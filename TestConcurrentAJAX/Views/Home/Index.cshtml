@@ -1,0 +1,33 @@
+﻿@{
+    ViewBag.Title = "Welcome!";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Welcome!</h1>
+
+<h2 id="ready"></h2>
+
+<pre id="progress"></pre>
+
+@section scripts
+{
+    <script>
+        $(function() {
+            $("#ready").append("Ready! ;-)");
+        });
+
+        $(function () {
+            @for (var i = 1; i <= 20; i++) {
+            <text>
+                $.ajax({
+                    url: "@Url.Action("CreateAsync", new { id = i })",
+                    type: "POST"
+                }).done(function (data) {
+                    $("#progress").append("(@i)-> ");
+                });
+            </text>
+            }
+        });
+
+    </script>
+}
