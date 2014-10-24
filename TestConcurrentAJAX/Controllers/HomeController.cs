@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.SessionState;
+using TestConcurrentAJAX.Tasks;
+using TestConcurrentAJAX.Utilities;
 
 namespace TestConcurrentAJAX.Controllers
 {
@@ -50,10 +51,9 @@ namespace TestConcurrentAJAX.Controllers
             ////    return View();
             ////}
 
-            var delay = new Random().Next(3000, 3000);
-            await Task.Delay(delay);
+            var delay = await new MyTask(id).DoTaskAsync();
 
-            return new HttpStatusCodeResult(HttpStatusCode.OK);
+            return Content(ContentFormatter.FormatContent(id, delay));
         }
 
         double NextDouble(Random rng, double min, double max)

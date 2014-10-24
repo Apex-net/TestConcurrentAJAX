@@ -1,32 +1,69 @@
 ﻿@{
     ViewBag.Title = "Welcome!";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    const int NumberOfTasks = 50;
 }
 
 <h1>Welcome!</h1>
 
-<h2 id="ready"></h2>
-
-<pre id="progress"></pre>
+<table style="height: 1500px;">
+    <tr>
+        <td style="vertical-align:top; background-color: lightpink; width: 200px;">
+            <h2 id="ajax-ready"></h2>
+            <pre id="ajax-progress"></pre>
+        </td>
+        <td style="vertical-align:top; background-color: lightskyblue; width: 200px;">
+            <h2 id="hub-ready"></h2>
+            <div id="hub-progress"></div>
+        </td>
+    </tr>
+</table>
 
 @section scripts
 {
     <script>
-        $(function() {
-            $("#ready").append("Ready! ;-)");
-        });
+        var runAjax = function() {
+            $("#ajax-ready").append("AJAX is go! ;-)");
 
-        $(function () {
-            @for (var i = 1; i <= 20; i++) {
+            @for (var i = 1; i <= NumberOfTasks; i++) {
             <text>
-                $.ajax({
-                    url: "@Url.Action("CreateAsync", new { id = i })",
+            $.ajax({
+                url: "@Url.Action("CreateAsync", new { id = i })",
                     type: "POST"
                 }).done(function (data) {
-                    $("#progress").append("(@i)-> ");
+                    $("#ajax-progress").append("<pre>" + data + "</pre>");
                 });
             </text>
             }
+        };
+
+        var runHub = function(hub) {
+            $("#hub-ready").append("Hub is ready! ;-)");
+
+            @for (var i = 1; i <= NumberOfTasks; i++)
+            {
+            <text>
+            hub.server.doTaskAsync(@i);
+            </text>
+            }
+        };
+
+        $(function () {
+            $.connection.hub.logging = true;
+
+            // Declare a proxy to reference the hub. 
+            var taskHub = $.connection.taskHub;
+
+            // Create a function that the hub can call to broadcast messages.
+            taskHub.client.showResult = function (id) {
+                $("#hub-progress").append("<pre>" + id + "</pre>");
+            };
+
+            $.connection.hub.start().done(function () {
+                runHub(taskHub);
+                runAjax();
+            });
         });
 
     </script>
